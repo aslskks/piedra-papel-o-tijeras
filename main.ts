@@ -1,6 +1,12 @@
 function check (num: number, num2: number) {
     if (num == num2) {
-        basic.showString("Draw")
+        basic.showLeds(`
+            # . . . .
+            . # . . .
+            . . # . .
+            . . . # .
+            . . . . #
+            `)
     } else if (num == 0 && num2 == 2) {
         basic.showIcon(IconNames.Yes)
     } else if (num == 1 && num2 == 0) {
@@ -26,7 +32,7 @@ input.onLogoEvent(TouchButtonEvent.LongPressed, function () {
     control.reset()
 })
 input.onButtonPressed(Button.A, function () {
-    if (dicided == 0) {
+    if (dicided == 0 && started == 1) {
         if (current == 0) {
             current = 2
             basic.showIcon(IconNames.Scissors)
@@ -49,13 +55,17 @@ function piedra () {
         `)
 }
 input.onButtonPressed(Button.AB, function () {
-    if (dicided == 0) {
+    if (dicided == 0 && started == 1) {
         radio.sendNumber(current)
         dicided = 1
     }
 })
+radio.onReceivedString(function (receivedString) {
+    started = 1
+    start()
+})
 input.onButtonPressed(Button.B, function () {
-    if (dicided == 0) {
+    if (dicided == 0 && started == 1) {
         if (current == 0) {
             current = 1
             basic.showIcon(IconNames.Square)
@@ -68,16 +78,24 @@ input.onButtonPressed(Button.B, function () {
         }
     }
 })
-let enemy = 0
-let enemy_d = 0
+function start () {
+    current = 0
+    dicided = 0
+    enemy_d = 0
+    enemy = 0
+    piedra()
+}
+let started = 0
 let dicided = 0
 let current = 0
+let enemy = 0
+let enemy_d = 0
 radio.setGroup(1)
-current = 0
-dicided = 0
-enemy_d = 0
-enemy = 0
-piedra()
+basic.forever(function () {
+    if (started == 0) {
+        radio.sendString("")
+    }
+})
 basic.forever(function () {
     if (dicided == 1 && enemy_d == 1) {
         check(current, enemy)
